@@ -22,4 +22,4 @@ The goal of this project is to develop a system of models for each task that can
 
 ## About the process
 
-The project is designed to be **easily reproducible**, with all the code and data organized in a clear and structured manner. This is why the whole end-to-end pipeline is contained in a single Jupyter Notebook (`project_arrythmias.ipynb`), which includes all the steps from data preprocessing to model evaluation. This notebook explains our approach in detail, and can be executed to reproduce the results on any machine.
+The project is designed to be **easily reproducible**, with all the code and data organized in a clear and structured manner. This is why the whole end-to-end pipeline is contained in a single Jupyter Notebook ([project_arrhythmias.ipynb](project_arrhythmias.ipynb)), which includes all the steps from data preprocessing to model evaluation. This notebook explains our approach in detail, and can be executed to reproduce the results on any machine.
