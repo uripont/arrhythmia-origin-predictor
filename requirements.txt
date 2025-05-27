@@ -19,3 +19,6 @@ scikit-image>=0.18.0
 
 # Signal processing
 sak @ git+https://github.com/guillermo-jimenez/sak.git
+
+# Jupyter notebooks
+ipykernel>=6.0.0
