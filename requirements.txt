@@ -1,21 +1,41 @@
-# Core data processing libraries
+############################################
+# Core data processing
+############################################
 numpy>=1.20.0
 pandas>=1.3.0
 scipy>=1.7.0
-opencv-python>=4.5.0
-scikit-learn>=1.0.0
-openpyxl>=3.0.0
 
-# Visualization
+############################################
+# Machine learning & optimisation
+############################################
+scikit-learn>=1.0.0
+xgboost>=1.6.0
+imbalanced-learn>=0.10.0
+optuna>=3.0.0
+shap>=0.44.0
+joblib>=1.0.0
+
+############################################
+# Deep learning
+############################################
+torch==2.4.1          # keep pinned to CUDA/toolchain you tested
+timm>=0.5.4
+
+############################################
+# Visualisation
+############################################
 matplotlib>=3.4.0
 seaborn>=0.11.0
 
-# Deep learning
-torch==2.4.1
-timm>=0.5.4
-
-# Image processing
+############################################
+# Image / signal processing
+############################################
 scikit-image>=0.18.0
-
-# Signal processing
+opencv-python>=4.5.0
 sak @ git+https://github.com/guillermo-jimenez/sak.git
+
+############################################
+# Notebook & file I/O
+############################################
+ipykernel>=6.0.0
+openpyxl>=3.0.0
