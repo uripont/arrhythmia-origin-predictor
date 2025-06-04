@@ -1,0 +1,17 @@
+{
+  "xgb_params": {
+    "n_estimators": 12,
+    "learning_rate": 0.12230841452087073,
+    "max_depth": 1,
+    "subsample": 0.7595058244311133,
+    "colsample_bytree": 0.8656674311012745,
+    "objective": "binary:logistic",
+    "random_state": 42,
+    "eval_metric": "aucpr",
+    "early_stopping_rounds": 50,
+    "reg_alpha": 0.8399715562995201,
+    "reg_lambda": 2.5529490953509826,
+    "gamma": 2.7639481365248137,
+    "min_child_weight": 8.870121412503599
+  }
+}
