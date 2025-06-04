@@ -18,7 +18,7 @@ joblib>=1.0.0
 ############################################
 # Deep learning
 ############################################
-torch==2.4.1          # keep pinned to CUDA/toolchain you tested
+torch==2.7.0          # keep pinned to CUDA/toolchain you tested
 timm>=0.5.4
 
 ############################################
