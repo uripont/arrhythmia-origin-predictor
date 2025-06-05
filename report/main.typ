@@ -30,7 +30,7 @@
 
 Ventricular tachycardia (VT) is a potentially life-threatening cardiac arrhythmia that can occur even in structurally normal hearts. In such cases, there is an overtaking of the sino-atrial activation, that is manifested as a premature ventricular contractions (PVC), which disrupts the heart's normal rhythm @doste2022training.
 
-VT is a serious condition that may lead to Sudden Cardiac Death (SCD) if left untreated. Among idiopathic ventricular tachycardias, which are those that occur in ventricles and are not linked to any detectable structural heart disease, Outflow Tract Ventricular Arrhythmias (OTVAs) are the most common subtype.
+VT is a serious condition that may lead to Sudden Cardiac Death (SCD) if left untreated. Among idiopathic ventricular tachycardias, which are those that occur in ventricles and are not linked to any detectable structural heart disease, Outflow Tract Ventricular Arrhythmias (OTVAs) are the most common subtype@anderson2019.
 
 Currently, two main treatments exist for managing OTVAs: antiarrhythmic drugs and radiofrequency ablation (RFA). This study focuses on RFA, a procedure in which targeted energy is used to burn and destroy the myocardial tissue responsible for initiating the arrhythmia. A critical factor for a successful RFA intervention is the accurate localization of the arrhythmia's Site of Origin (SOO). Identifying whether the SOO is located in the left ventricular outflow tract (LVOT) or the right ventricular outflow tract (RVOT) is essential, as it determines the appropriate vascular access route for the ablation catheter. Early and accurate localization can improve procedural success rates, reduce intervention time, and minimize patient risk.
 
@@ -61,7 +61,7 @@ The following sections describe each data processing and modeling step in detail
 
 Preprocessing began with cleaning and organizing the dataset from 'all_points_may_2024.pkl', which contained comprehensive patient-level information including demographics, clinical indicators, and ECG structure data. Each row corresponded to a unique patient and included fields such as patient ID, sex, age, hypertension (HTA), diabetes (DM), smoking status, PVC transition, BMI, and others, along with a Structures column containing the ECGs. For the initial steps, only demographic and clinical features were considered, and the Structures column was excluded to simplify preprocessing focused on patient-level attributes.
 
-Although demographic data was initially assumed to have limited value in predicting the site of origin (SOO) or its sub-regions, evidence from Bocanegra-Pérez et al. (2024) @netwok2020 showed that including these features significantly improved classification accuracy (from 67% to 89%) regardless of whether full ECGs or derived features were used. Based on this, demographic preprocessing was the first step done. All categorical variables such as sex, HTA, and smoker status were binarized, with values standardized to 0 and 1. The original dataset also stored many fields in nested lists, which were flattened to allow proper manipulation. Missing data in continuous features such as ‘weight’ and ‘height’ was handled using statistical imputation based on outlier presence. For height, where no outliers were detected, the mean value was used to fill in 33 missing entries. In contrast, the weight column had four outliers, so the median was used to impute 34 missing values. For BMI, where 89 entries were missing but both height and weight were available, BMI was recalculated using the standard formula. This resulted in a complete BMI column with no remaining gaps.
+Although demographic data was initially assumed to have limited value in predicting the site of origin (SOO) or its sub-regions, evidence from Bocanegra-Pérez et al. (2024) @bocanegra showed that including these features significantly improved classification accuracy (from 67% to 89%) regardless of whether full ECGs or derived features were used. Based on this, demographic preprocessing was the first step done. All categorical variables such as sex, HTA, and smoker status were binarized, with values standardized to 0 and 1. The original dataset also stored many fields in nested lists, which were flattened to allow proper manipulation. Missing data in continuous features such as ‘weight’ and ‘height’ was handled using statistical imputation based on outlier presence. For height, where no outliers were detected, the mean value was used to fill in 33 missing entries. In contrast, the weight column had four outliers, so the median was used to impute 34 missing values. For BMI, where 89 entries were missing but both height and weight were available, BMI was recalculated using the standard formula. This resulted in a complete BMI column with no remaining gaps.
 
 Label definition followed, targeting two classification problems: Model B for binary SOO classification (LVOT vs. RVOT) and Model C for sub-region classification within these chambers (RCC vs. COMMISSURE). The SOO_chamber and SOO columns in the original dataset included highly detailed anatomical labels, which were mapped to these broader categories. Two Excel files were used in this mapping process (POSAR NOM EXCEL). The first served as the primary reference, using the SOO_Chamber and Region_Simplified columns to map raw anatomical labels to standard categories. The second file offered additional mappings and was used to confirm and supplement the primary mapping. These resources enabled a full relabeling of all 93 anatomical labels into two clean outcome columns—Outcome_B and Outcome_C. Once created, the original SOO_chamber and SOO columns were removed.
 
@@ -126,6 +126,35 @@ For Task 2, a filtered version of the dataset was created by including only pati
   caption: [Example JSON output from the ECG segmentation model showing the detected P-waves, QRS complexes, and T-waves with their corresponding sample indices.]
 ) <fig:ecg-segmentation>
 
+
+
+=== Dimensionality reduction
+
+After performing PCA, the number of features is reduced from 28.236 to 200, while still preserving 95.58% of the total variance in the data. In Figure__ it is displayed a heatmap representing the loadings (the contribution weights) of each ECG lead over time samples for the Varimax PCA performed. Red indicates positive loading, in order words higher contributions, blue negative loadings, and white means close to zero contributions. This figure clearly shows which parts of the ECG signal (across time and across leads) contribute most strongly to this specific component. 
+
+=== Model B
+
+#figure(
+  caption: [Overall Test Metrics],
+  placement: top,
+  table(
+    columns: (12em, auto),
+    align: (left, right),
+    inset: (x: 8pt, y: 4pt),
+    stroke: (x, y) => if y <= 1 { (top: 0.5pt) },
+    fill: (x, y) => if y > 0 and calc.rem(y, 2) == 0 { rgb("#efefef") },
+
+    table.header[Metric][Value],
+
+    [Macro Accuracy],  [0.8395],
+    [Macro Precision], [0.7767],
+    [Macro Recall],    [0.8339],
+    [Macro F1-Score],  [0.7962],
+    [ROC AUC],         [0.8919],
+    [PR AUC],          [0.9660],
+  )
+)
+
 #figure(
   caption: [Classification Report for LVOT vs. RVOT],
   placement: top,
@@ -138,16 +167,76 @@ For Task 2, a filtered version of the dataset was created by including only pati
 
     table.header[][Precision][Recall][f1-score][support],
 
-    [LVOT], [0.6568], [0.6976], [0.6766], [1078],
-    [RVOT], [0.9105], [0.8940], [0.9022], [3709],
-    [accuracy], [], [], [*0.8498*], [4787],
-    [macro average], [0.7836], [0.7958], [0.7894], [4787],
-    [weighted average], [0.8534], [0.8498], [0.8514], [4787],
+    [LVOT],            [0.6120], [0.8236], [0.7022], [1128],
+    [RVOT],            [0.9413], [0.8443], [0.8902], [3782],
+    [accuracy],        [],       [],       [*0.8395*], [4910],
+    [macro average],   [0.7767], [0.8339], [0.7962], [4910],
+    [weighted average],[0.8657], [0.8395], [0.8470], [4910],
   )
 )
 
 #figure(
-  caption: [Performance Across All Data Splits for LVOT vs. RVOT Classification usin Model_training_B],
+  caption: [Table 2. Confusion Matrix (RVOT vs. LVOT)],
+  placement: top,
+
+  table(
+    columns: (10em, auto, auto),
+    align: (left, center, center),
+    inset: (x: 8pt, y: 4pt),
+
+    // Thin horizontal line under the header row:
+    stroke: (x, y) => if y <= 1 { (top: 0.5pt) },
+
+    // Light‐gray background on every even data row:
+    fill: (x, y) => if y > 1 and calc.rem(y, 2) == 0 { rgb("#f5f5f5") },
+
+    // Header row: each header cell is its own bracketed entry
+    table.header[Actual \ Predicted][LVOT][RVOT],
+
+    // Data rows:
+    [LVOT], [929], [199],
+    [RVOT], [589], [3193],
+  )
+)
+
+
+#figure(
+  image("figures/roc_model_b.png", width: 60%),
+  caption: [Receiver Operating Characteristic (ROC) curve for Model B, illustrating the model's performance in distinguishing between left ventricular outflow tract (LVOT) and right ventricular outflow tract (RVOT) origins. The curve shows the trade-off between true positive rate and false positive rate at various threshold settings, with an area under the curve (AUC) of 0.892 indicating strong classification ability.]
+) <fig-roc-model-b>
+
+#figure(
+  image("figures/precision_recall_model_b.png", width: 60%),
+  caption: [Precision-Recall curve for Model B, depicting the model's performance in classifying left ventricular outflow tract (LVOT) and right ventricular outflow tract (RVOT) origins. The curve illustrates the trade-off between precision and recall at different thresholds, with an area under the curve (AUC) of 0.966 indicating high classification quality.]
+) <fig-pr-model-b>
+
+
+
+=== Model B-Lite
+
+#figure(
+  caption: [Overall Test Metrics],
+  placement: top,
+  table(
+    columns: (12em, auto),
+    align: (left, right),
+    inset: (x: 8pt, y: 4pt),
+    stroke: (x, y) => if y <= 1 { (top: 0.5pt) },
+    fill: (x, y) => if y > 0 and calc.rem(y, 2) == 0 { rgb("#efefef") },
+
+    table.header[Metric][Value],
+
+    [Macro Accuracy],  [0.8297],
+    [Macro Precision], [0.7614],
+    [Macro Recall],    [0.7974],
+    [Macro F1-Score],  [0.7757],
+    [ROC AUC],         [0.8833],
+    [PR AUC],          [0.9620],
+  )
+)
+
+#figure(
+  caption: [Classification Report for LVOT vs. RVOT],
   placement: top,
   table(
     columns: (10em, auto, auto, auto, auto),
@@ -156,16 +245,15 @@ For Task 2, a filtered version of the dataset was created by including only pati
     stroke: (x, y) => if y <= 1 { (top: 0.5pt) },
     fill: (x, y) => if y > 0 and calc.rem(y, 2) == 0 { rgb("#efefef") },
 
-    table.header[][Accuracy][Precision][Recall][F1-score][ROC AUC][PR AUC],[Threshold],
+    table.header[][Precision][Recall][f1-score][support],
 
-    [Split], 
-    [Train], [0.8812], [0.8212], [0.9064], [0.8484],[0.9624],[0.9887],[0.71],
-    [Validation], [0.8498], [0.7836], [0.7958], [0.7894],[0.8744],[0.9602],[0.71],
-    [Test], [0.8395], [0.7767], [0.7894], [4787],
-    [All data], [0.8534], [0.8498], [0.8514], [4787],
+    [LVOT],            [0.6064], [0.7376], [0.6656], [1128],
+    [RVOT],            [0.9163], [0.8572], [0.8858], [3782],
+    [accuracy],        [],       [],       [*0.8297*], [4910],
+    [macro average],   [0.7614], [0.7974], [0.7757], [4910],
+    [weighted average],[0.8451], [0.8297], [0.8352], [4910],
   )
 )
-
 
 
 #figure(
@@ -187,30 +275,27 @@ For Task 2, a filtered version of the dataset was created by including only pati
     table.header[Actual \ Predicted][LVOT][RVOT],
 
     // Data rows:
-    [LVOT], [752], [326],
-    [RVOT], [410], [3299],
+    [LVOT], [832], [296],
+    [RVOT], [540], [3242],
   )
 )
+
+
 
 #figure(
-  caption: [Classification Report for LVOT vs. RVOT],
-  placement: top,
-  table(
-    columns: (10em, auto, auto, auto, auto),
-    align: (left, right, right, right, right),
-    inset: (x: 8pt, y: 4pt),
-    stroke: (x, y) => if y <= 1 { (top: 0.5pt) },
-    fill: (x, y) => if y > 0 and calc.rem(y, 2) == 0 { rgb("#efefef") },
+  image("figures/roc_model_b_lite.png", width: 60%),
+  caption: [Receiver Operating Characteristic (ROC) curve for the "lite" version of Model B, showing its performance in distinguishing between left ventricular outflow tract (LVOT) and right ventricular outflow tract (RVOT) origins.]
+) <fig-roc-model-b-lite>
 
-    table.header[][Precision][Recall][f1-score][support],
+#figure(
+  image("figures/precision_recall_model_b_lite.png", width: 60%),
+  caption: [Precision-Recall curve for the "lite" version of Model B, illustrating its performance in classifying left ventricular outflow tract (LVOT) and right ventricular outflow tract (RVOT) origins.]
+) <fig-pr-model-b-lite>
 
-    [LVOT],            [0.6568], [0.6976], [0.6766], [1078],
-    [RVOT],            [0.9105], [0.8940], [0.9022], [3709],
-    [accuracy],        [],       [],       [*0.8498*], [4787],
-    [macro average],   [0.7836], [0.7958], [0.7894], [4787],
-    [weighted average],[0.8534], [0.8498], [0.8514], [4787],
-  )
-)
+
+
+
+=== Model C
 
 #figure(
   caption: [Overall Test Metrics],
@@ -224,20 +309,60 @@ For Task 2, a filtered version of the dataset was created by including only pati
 
     table.header[Metric][Value],
 
-    [Macro Accuracy],  [0.8568],
-    [Macro Precision], [0.7954],
-    [Macro Recall],    [0.8436],
-    [Macro F1-Score],  [0.8139],
-    [ROC AUC],         [0.8992],
-    [PR AUC],          [0.9669],
+    [Macro Accuracy],  [0.7576],
+    [Macro Precision], [0.8706],
+    [Macro Recall],    [0.6033],
+    [Macro F1-Score],  [0.5969],
+    [ROC AUC],         [0.2095],
+    [PR AUC],          [0.3611],
+  )
+)
+
+#figure(
+  caption: [Classification Report for COMMISURE vs. RCC],
+  placement: top,
+  table(
+    columns: (10em, auto, auto, auto, auto),
+    align: (left, right, right, right, right),
+    inset: (x: 8pt, y: 4pt),
+    stroke: (x, y) => if y <= 1 { (top: 0.5pt) },
+    fill: (x, y) => if y > 0 and calc.rem(y, 2) == 0 { rgb("#efefef") },
+
+    table.header[][Precision][Recall][f1-score][support],
+
+    [COMMISURE],       [0.7412], [1.0000], [0.8514], [275],
+    [RCC],             [1.0000], [0.2066], [0.3425], [121],
+    [accuracy],        [],       [],       [*0.7576*], [396],
+    [macro average],   [0.8706], [0.6033], [0.5969], [396],
+    [weighted average],[0.8203], [0.7576], [0.6959], [396],
   )
 )
 
 
-=== Dimensionality reduction
 
-After performing PCA, the number of features is reduced from 28.236 to 200, while still preserving 95.58% of the total variance in the data. In Figure__ it is displayed a heatmap representing the loadings (the contribution weights) of each ECG lead over time samples for the Varimax PCA performed. Red indicates positive loading, in order words higher contributions, blue negative loadings, and white means close to zero contributions. This figure clearly shows which parts of the ECG signal (across time and across leads) contribute most strongly to this specific component. 
+#figure(
+  caption: [Table 2. Confusion Matrix (RCC vs. COMMISURE)],
+  placement: top,
 
+  table(
+    columns: (10em, auto, auto),
+    align: (left, center, center),
+    inset: (x: 8pt, y: 4pt),
+
+    // Thin horizontal line under the header row:
+    stroke: (x, y) => if y <= 1 { (top: 0.5pt) },
+
+    // Light‐gray background on every even data row:
+    fill: (x, y) => if y > 1 and calc.rem(y, 2) == 0 { rgb("#f5f5f5") },
+
+    // Header row: each header cell is its own bracketed entry
+    table.header[Actual \ Predicted][COMMISSURE][RCC],
+
+    // Data rows:
+    [COMMISSURE], [275], [0],
+    [RCC], [96], [25],
+  )
+)
 
 ==== Part 1: Classification of LVOT and RVOT
 
@@ -322,3 +447,4 @@ Despite the strong validation metrics, the drop in test performance, particularl
   image("figures/system_of_models_part_2.png", width: 60%),
   caption: [System architecture for Part 2, showing the two-stage machine learning approach for further classifying the site of origin (SOO) of outflow tract ventricular arrhythmias (OTVAs) into right coronary cusp (RCC) and commissure. The model builds on the first stage's output, using demographic data and ECG features, with SHAP values enhancing interpretability.]
 ) <fig-shap-full>
+
