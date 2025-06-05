@@ -14,7 +14,7 @@ This project is divided into two main tasks, each focusing on a different aspect
    Classification of arrhythmia as originating from either the Left Ventricular Outflow Tract (LVOT) or the Right Ventricular Outflow Tract (RVOT).
 
 2. **Part 2: Sub-regional localization**  
-   Discrimination between origins at the Right Coronary Cusp (RCC) and the aortomitral commissure (the mitral-aortic continuity), both of which are located in the LVOT.
+   Discrimination between origins at the Right Coronary Cusp (RCC) and the aortomitral commissure (the mitral-aortic continuity).
 
 ## Goals
 

@@ -3,31 +3,41 @@
 #show: ieee.with(
   title: [An interpretable prediction system for the Site Of Origin (SOO) of Outflow Tract Ventricular Arrhythmias (OTVAs)],
   abstract: [
-    Aixo es pot tocar per escriure l'abstract, aneu mirant tota l'estructura (s'entén molt bé, i com podeu veure es renderitza amb bon format en temps real!).
+    // TODO
   ],
   authors: (
     (
       name: "Jana Casaú, Marc Mallol, Carla Pairés, Oriol Pont",
     ),
   ),
-  index-terms: ("Scientific writing", "Typesetting", "Document creation", "Syntax"),
+  index-terms: (
+    "Ventricular tachycardia",
+    "Outflow tract ventricular arrhythmias",
+    "Site of origin",
+    "Machine learning",
+    "XGBoost",
+    "Interpretable machine learning",
+  ),
   bibliography: bibliography("refs.bib"),
-  figure-supplement: [Fig.],
+  figure-supplement: [Figure],
 )
 
 = Introduction
 
-Ventricular tachycardia (VT) is a potentially life-threatening cardiac arrhythmia that can occur even in structurally normal hearts. In such cases, there is an overtaking of the sino-atrial activation, that is manifested as a premature ventricular contractions (PVC), which disrupts the heart's normal rhythm @doste2022training
+Ventricular tachycardia (VT) is a potentially life-threatening cardiac arrhythmia that can occur even in structurally normal hearts. In such cases, there is an overtaking of the sino-atrial activation, that is manifested as a premature ventricular contractions (PVC), which disrupts the heart's normal rhythm @doste2022training.
 
+VT is a serious condition that may lead to Sudden Cardiac Death (SCD) if left untreated. Among idiopathic ventricular tachycardias, which are those that occur in ventricles and are not linked to any detectable structural heart disease, Outflow Tract Ventricular Arrhythmias (OTVAs) are the most common subtype.
 
+Currently, two main treatments exist for managing OTVAs: antiarrhythmic drugs and radiofrequency ablation (RFA). This study focuses on RFA, a procedure in which targeted energy is used to burn and destroy the myocardial tissue responsible for initiating the arrhythmia. A critical factor for a successful RFA intervention is the accurate localization of the arrhythmia's Site of Origin (SOO). Identifying whether the SOO is located in the left ventricular outflow tract (LVOT) or the right ventricular outflow tract (RVOT) is essential, as it determines the appropriate vascular access route for the ablation catheter. Early and accurate localization can improve procedural success rates, reduce intervention time, and minimize patient risk.
 
-. VT is a serious condition that may lead to sudden cardiac death (SCD) if left untreated. Among idiopathic ventricular tachycardias—those that occur in ventricles and are not linked to any detectable structural heart disease—outflow tract ventricular arrhythmias (OTVAs) are the most common subtype.
+There are numerous potential SOOs where OTVAs may arise. However, this study focuses specifically on two anatomical locations: the right coronary cusp and commissure. Anatomically, the aortic valve consists of three cusps: the right coronary cusp (RCC), the left coronary cusp (LCC), and the non-coronary cusp (NCC), as illustrated in @fig:aortic-valve. The commissure refers to the junction between two cusps, for example the left-right commissure lies between the LCC and RCC @umn2025cardiacvalvenomenclature.
 
-Currently, two main treatments exist for managing OTVAs: antiarrhythmic drugs and radiofrequency ablation (RFA). This study focuses on RFA, a procedure in which targeted energy is used to burn and destroy the myocardial tissue responsible for initiating the arrhythmia. A critical factor for a successful RFA intervention is the accurate localization of the arrhythmia's site of origin (SOO). Identifying whether the SOO is located in the left ventricular outflow tract (LVOT) or the right ventricular outflow tract (RVOT) is essential, as it determines the appropriate vascular access route for the ablation catheter. Early and accurate localization can improve procedural success rates, reduce intervention time, and minimize patient risk.
+#figure(
+  image("figures/aortic_valve_cusps.png", width: 70%),
+  caption: [Anatomical representation of the aortic valve showing the right coronary cusp (RCC), left coronary cusp (LCC), and non-coronary cusp (NCC).],
+) <fig:aortic-valve>
 
-There are numerous potential sites of origin (SOO) where outflow tract ventricular arrhythmias (OTVAs) may arise. However, this study focuses specifically on two anatomical locations: the right coronary cusp and commissure. Anatomically, the aortic valve consists of three cusps: the right coronary cusp (RCC), the left coronary cusp (LCC), and the non-coronary cusp (NCC), as illustrated in Figure __. The commissure refers to the junction between two cusps, for example the left-right commissure lies between the LCC and RCC (University of Minnesota Anatomy Tutorial).
-
-The goal of this study is twofold. First, we aim to classify whether the SOO of the arrhythmia is in the LVOT or RVOT using a combination of demographic information and ECG-derived features. Second, the approach is more specific since it is sought to further localize the SOO by distinguishing between two specific anatomical sites: the RCC and commissure. Both tasks leverage machine learning models trained on clinical and electrophysiological data to enhance pre-procedural planning and support more targeted interventions.
+The goal of this study is twofold. First, we aim to classify whether the SOO of the arrhythmia is in the LVOT or RVOT using a combination of demographic information and ECG-derived features. Second, the approach is more specific since it is sought to further localize the SOO by distinguishing between two specific anatomical sites: the RCC and the commissure. Both tasks leverage machine learning models trained on clinical and electrophysiological data to enhance pre-procedural planning and support more targeted interventions.
 
 
 = Methods <sec:methods>
