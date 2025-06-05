@@ -39,7 +39,7 @@ There are numerous potential SOOs where OTVAs may arise. However, this study foc
 #figure(
   image("figures/rcc.png", width: 60%),
   caption: [Detailed view of the right coronary cusp (RCC), highlighting its structural features and anatomical significance in the aortic valve.]
-) <fig-rcc><
+) <fig-rcc>
 
 The goal of this study is twofold. First, we aim to classify whether the SOO of the arrhythmia is in the LVOT or RVOT using a combination of demographic information and ECG-derived features. Second, the approach is more specific since it is sought to further localize the SOO by distinguishing between two specific anatomical sites: the RCC and the commissure. Both tasks leverage machine learning models trained on clinical and electrophysiological data to enhance pre-procedural planning and support more targeted interventions.
 
@@ -50,18 +50,34 @@ To understand how the processed data was obtained, it is important to first outl
 
 These selected ECG features are then combined with the patients' demographic data, which has been preprocessed separately. The merged dataset is passed into Model B, which is responsible for the first classification task: distinguishing between LVOT and RVOT origins. This forms the focus of Part 1 of the project.
 
+
+#figure(
+  image("figures/system_of_models_part_1.png", width: 100%),
+  caption: [System architecture for Part 1, illustrating the two-stage machine learning approach.]
+) <fig-shap-full>
+
 For Part 2, we refine the dataset further by filtering out any patients whose outcomes are not classified as either RCC or COMMISURE. Since we are only interested in these two outcomes at this stage, all others are excluded. The resulting data is then used as input for Model C, which focuses on classifying between RCC and COMMISURE outcomes.
+
+
+#figure(
+  image("figures/system_of_models_part_2.png", width: 102%),
+  caption: [System architecture for Part 2, showing the modularity of the system and how it builds upon the structure established in Part 1.]
+) <fig-shap-full>
+
+
 
 The following sections describe each data processing and modeling step in detail.
 
 == Data Preprocessing
 // TODO
 
+
+
 === Demograpgic data 
 
 Preprocessing began with cleaning and organizing the dataset from 'all_points_may_2024.pkl', which contained comprehensive patient-level information including demographics, clinical indicators, and ECG structure data. Each row corresponded to a unique patient and included fields such as patient ID, sex, age, hypertension (HTA), diabetes (DM), smoking status, PVC transition, BMI, and others, along with a Structures column containing the ECGs. For the initial steps, only demographic and clinical features were considered, and the Structures column was excluded to simplify preprocessing focused on patient-level attributes.
 
-Although demographic data was initially assumed to have limited value in predicting the site of origin (SOO) or its sub-regions, evidence from Bocanegra-Pérez et al. (2024) @bocanegra showed that including these features significantly improved classification accuracy (from 67% to 89%) regardless of whether full ECGs or derived features were used. Based on this, demographic preprocessing was the first step done. All categorical variables such as sex, HTA, and smoker status were binarized, with values standardized to 0 and 1. The original dataset also stored many fields in nested lists, which were flattened to allow proper manipulation. Missing data in continuous features such as ‘weight’ and ‘height’ was handled using statistical imputation based on outlier presence. For height, where no outliers were detected, the mean value was used to fill in 33 missing entries. In contrast, the weight column had four outliers, so the median was used to impute 34 missing values. For BMI, where 89 entries were missing but both height and weight were available, BMI was recalculated using the standard formula. This resulted in a complete BMI column with no remaining gaps.
+Although demographic data was initially assumed to have limited value in predicting the site of origin (SOO) or its sub-regions, evidence from @bocanegra showed that including these features significantly improved classification accuracy (from 67% to 89%) regardless of whether full ECGs or derived features were used. Based on this, demographic preprocessing was the first step done. All categorical variables such as sex, HTA, and smoker status were binarized, with values standardized to 0 and 1. The original dataset also stored many fields in nested lists, which were flattened to allow proper manipulation. Missing data in continuous features such as ‘weight’ and ‘height’ was handled using statistical imputation based on outlier presence. For height, where no outliers were detected, the mean value was used to fill in 33 missing entries. In contrast, the weight column had four outliers, so the median was used to impute 34 missing values. For BMI, where 89 entries were missing but both height and weight were available, BMI was recalculated using the standard formula. This resulted in a complete BMI column with no remaining gaps.
 
 Label definition followed, targeting two classification problems: Model B for binary SOO classification (LVOT vs. RVOT) and Model C for sub-region classification within these chambers (RCC vs. COMMISSURE). The SOO_chamber and SOO columns in the original dataset included highly detailed anatomical labels, which were mapped to these broader categories. Two Excel files were used in this mapping process (POSAR NOM EXCEL). The first served as the primary reference, using the SOO_Chamber and Region_Simplified columns to map raw anatomical labels to standard categories. The second file offered additional mappings and was used to confirm and supplement the primary mapping. These resources enabled a full relabeling of all 93 anatomical labels into two clean outcome columns—Outcome_B and Outcome_C. Once created, the original SOO_chamber and SOO columns were removed.
 
@@ -435,16 +451,5 @@ Despite the strong validation metrics, the drop in test performance, particularl
 #figure(
   image("figures/shap_values_no_lite.png", width: 60%),
   caption: [Comprehensive SHAP value analysis showing feature contributions in the full model version, providing detailed insights into the model's decision-making process.]
-) <fig-shap-full>
-
-
-#figure(
-  image("figures/system_of_models_part_1.png", width: 60%),
-  caption: [System architecture for Part 1, illustrating the two-stage machine learning approach for predicting the site of origin (SOO) of outflow tract ventricular arrhythmias (OTVAs). The first stage dimensionally reduces ECG features using PCA, while the second stage classifies between LVOT and RVOT origins. The model uses demographic data and ECG features, with SHAP values providing interpretability.]
-) <fig-shap-full>
-
-#figure(
-  image("figures/system_of_models_part_2.png", width: 60%),
-  caption: [System architecture for Part 2, showing the two-stage machine learning approach for further classifying the site of origin (SOO) of outflow tract ventricular arrhythmias (OTVAs) into right coronary cusp (RCC) and commissure. The model builds on the first stage's output, using demographic data and ECG features, with SHAP values enhancing interpretability.]
 ) <fig-shap-full>
 
