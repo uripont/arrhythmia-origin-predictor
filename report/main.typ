@@ -137,9 +137,33 @@ For Task 2, a filtered version of the dataset was created by including only pati
 
     [LVOT], [0.6568], [0.6976], [0.6766], [1078],
     [RVOT], [0.9105], [0.8940], [0.9022], [3709],
-    [accuracy], [], [], [0.8498], [4787],
+    [accuracy], [], [], [*0.8498*], [4787],
     [macro average], [0.7836], [0.7958], [0.7894], [4787],
     [weighted average], [0.8534], [0.8498], [0.8514], [4787],
+  )
+)
+
+#figure(
+  caption: [Table 2. Confusion Matrix (RVOT vs. LVOT)],
+  placement: top,
+
+  table(
+    columns: (10em, auto, auto),
+    align: (left, center, center),
+    inset: (x: 8pt, y: 4pt),
+
+    // Thin horizontal line under the header row:
+    stroke: (x, y) => if y == 1 { (top: 0.5pt) },
+
+    // Light‐gray background on every even data row:
+    fill: (x, y) => if y > 1 and calc.rem(y, 2) == 0 { rgb("#f5f5f5") },
+
+    // Header row: each header cell is its own bracketed entry
+    table.header[Actual \ Predicted][LVOT][RVOT],
+
+    // Data rows:
+    [LVOT], [752], [326],
+    [RVOT], [410], [3299],
   )
 )
 
