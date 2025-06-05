@@ -46,14 +46,16 @@ The goal of this study is twofold. First, we aim to classify whether the SOO of 
 
 = Methods <sec:methods>
 
-To understand how the processed data was obtained, it's important to first outline the multimodal system used in this study. The process begins with what we call Model A, which takes as input a dataframe containing ECG data from the selected patients. This model performs a feature reduction using Principal Component Analysis (PCA), helping to identify and retain only the most relevant features from the ECG signals.
+To understand how the processed data was obtained, it is important to first outline the multimodal system used in this study. The process begins with what we call Model A, which takes as input a dataframe containing ECG data from the selected patients. This model performs a dimensionality reduction using Principal Component Analysis (PCA), helping to identify and retain only the most relevant features from the raw ECG signals.
 
 These selected ECG features are then combined with the patients' demographic data, which has been preprocessed separately. The merged dataset is passed into Model B, which is responsible for the first classification task: distinguishing between LVOT and RVOT origins. This forms the focus of Part 1 of the project.
 
 For Part 2, we refine the dataset further by filtering out any patients whose outcomes are not classified as either RCC or COMMISURE. Since we are only interested in these two outcomes at this stage, all others are excluded. The resulting data is then used as input for Model C, which focuses on classifying between RCC and COMMISURE outcomes.
 
 The following sections describe each data processing and modeling step in detail.
+
 == Data Preprocessing
+// TODO
 
 === Demograpgic data 
 
@@ -81,29 +83,11 @@ To align the ECGs, the time difference between the detected R-peak and the 2nd s
 
 At the end of this process, the ECGs are fully preprocessed and ready to serve as inputs for model A, which performs dimensionality reduction.
 
-#figure(
-  block(
-    width: 100%,
-    ```json
-    {
-      "0": {
-        "P": [[723, 851], [1392, 1519]],
-        "QRS": [[892, 1023], [1564, 1676], [1945, 2088]],
-        "T": [[0, 214], [1088, 1295], [1745, 1936], [2105, 2340]]
-      }
-    }
-    ```
-  ),
-  caption: [Example JSON output from the ECG segmentation model showing the detected P-waves, QRS complexes, and T-waves with their corresponding sample indices.]
-) <fig:ecg-segmentation>
-
-
 === Dimensionality Reduction (Model A)
 
 To ensure a more reliable and objective analysis, instead of manually selecting the most important features for distinguishing between LVOT and RVOT, we apply dimensionality reduction using Principal Component Analysis (PCA). This allows the algorithm to automatically identify the key features that contribute most to the classification task, instead of using subjective criteria, improving precision. To further improve interpretability, we apply Varimax rotation to the principal components. Varimax is an orthogonal rotation technique that redistributes the variance across components, making the loadings more distinct and sparse. This helps clarify which original features contribute most to each component, facilitating a more meaningful understanding of the underlying structure that differentiates LVOT from RVOT. 
 
 Applying dimensionality reduction is important for several reasons. First, it prevents overfitting, since working with too many features can cause the model to fit noise rather than true patterns, reducing generalization to new data. Additionally, handling high-dimensional data is computationally expensive and complex, and the curse of dimensionality makes it difficult for models to learn meaningful relationships when the number of features is very large. Therefore, reducing dimensionality simplifies the problem, improves model performance, and optimizes computation.
-
 
 == MODEL TRAINING
 
@@ -127,6 +111,22 @@ For Task 2, a filtered version of the dataset was created by including only pati
 
 
 #figure(
+  block(
+    width: 100%,
+    ```json
+    {
+      "0": {
+        "P": [[723, 851], [1392, 1519]],
+        "QRS": [[892, 1023], [1564, 1676], [1945, 2088]],
+        "T": [[0, 214], [1088, 1295], [1745, 1936], [2105, 2340]]
+      }
+    }
+    ```
+  ),
+  caption: [Example JSON output from the ECG segmentation model showing the detected P-waves, QRS complexes, and T-waves with their corresponding sample indices.]
+) <fig:ecg-segmentation>
+
+#figure(
   caption: [Classification Report for LVOT vs. RVOT],
   placement: top,
   table(
@@ -145,6 +145,8 @@ For Task 2, a filtered version of the dataset was created by including only pati
     [weighted average], [0.8534], [0.8498], [0.8514], [4787],
   )
 )
+
+
 
 #figure(
   caption: [Table 2. Confusion Matrix (RVOT vs. LVOT)],
@@ -215,6 +217,7 @@ For Task 2, a filtered version of the dataset was created by including only pati
 
 After performing PCA, the number of features is reduced from 28.236 to 200, while still preserving 95.58% of the total variance in the data. In Figure__ it is displayed a heatmap representing the loadings (the contribution weights) of each ECG lead over time samples for the Varimax PCA performed. Red indicates positive loading, in order words higher contributions, blue negative loadings, and white means close to zero contributions. This figure clearly shows which parts of the ECG signal (across time and across leads) contribute most strongly to this specific component. 
 
+
 ==== Part 1: Classification of LVOT and RVOT
 
 During the training process for Model B, we explored a wide range of hyperparameter configurations for the XGBoost model, including the number of estimators, tree depth, and regularization parameters. As part of this experimentation, we tested a version of the model with a maximum tree depth limited to 1 which means that each decision tree was restricted to a single binary split. Surprisingly, this extremely simple configuration achieved very strong performance. 
@@ -253,3 +256,40 @@ Despite the strong validation metrics, the drop in test performance, particularl
 
 
 == FALTA INTERPRETACIO DE LES DE SHAP 
+
+#figure(
+  image("figures/rcc.png", width: 60%),
+  caption: [Detailed view of the right coronary cusp (RCC), highlighting its structural features and anatomical significance in the aortic valve.]
+) <fig-rcc>
+
+// ECG Analysis
+#figure(
+  image("figures/ECG_with_component.png", width: 60%),
+  caption: [Electrocardiogram (ECG) signal with highlighted components, showing the key cardiac electrical activity phases and their characteristic waveforms.]
+) <fig-ecg-components>
+
+#figure(
+  image("figures/ecg_segmentation_not_aligned_validation.png", width: 60%),
+  caption: [Validation results of ECG segmentation before alignment, demonstrating the initial segmentation output on the validation dataset.]
+) <fig-segmentation-unaligned>
+
+#figure(
+  image("figures/segmentation_aligned.png", width: 60%),
+  caption: [Aligned ECG segmentation results, showing improved temporal alignment of cardiac cycles after applying alignment procedures.]
+) <fig-segmentation-aligned>
+
+// Analysis Results
+#figure(
+  image("figures/component_0_pca.png", width: 60%),
+  caption: [First principal component analysis (PCA) visualization, highlighting the main pattern of variation in the ECG data.]
+) <fig-pca>
+
+#figure(
+  image("figures/shap_values_model_c.png", width: 60%),
+  caption: [SHAP (SHapley Additive exPlanations) values for Model C, illustrating feature importance and their impact on model predictions.]
+) <fig-shap-c>
+
+#figure(
+  image("figures/shap_values_no_lite.png", width: 60%),
+  caption: [Comprehensive SHAP value analysis showing feature contributions in the full model version, providing detailed insights into the model's decision-making process.]
+) <fig-shap-full>
