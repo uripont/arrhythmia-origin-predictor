@@ -78,6 +78,23 @@ To align the ECGs, the time difference between the detected R-peak and the 2nd s
 
 At the end of this process, the ECGs are fully preprocessed and ready to serve as inputs for model A, which performs dimensionality reduction.
 
+#figure(
+  block(
+    width: 100%,
+    ```json
+    {
+      "0": {
+        "P": [[723, 851], [1392, 1519]],
+        "QRS": [[892, 1023], [1564, 1676], [1945, 2088]],
+        "T": [[0, 214], [1088, 1295], [1745, 1936], [2105, 2340]]
+      }
+    }
+    ```
+  ),
+  caption: [Example JSON output from the ECG segmentation model showing the detected P-waves, QRS complexes, and T-waves with their corresponding sample indices.]
+) <fig:ecg-segmentation>
+
+
 === Dimensionality Reduction (Model A)
 
 To ensure a more reliable and objective analysis, instead of manually selecting the most important features for distinguishing between LVOT and RVOT, we apply dimensionality reduction using Principal Component Analysis (PCA). This allows the algorithm to automatically identify the key features that contribute most to the classification task, instead of using subjective criteria, improving precision. To further improve interpretability, we apply Varimax rotation to the principal components. Varimax is an orthogonal rotation technique that redistributes the variance across components, making the loadings more distinct and sparse. This helps clarify which original features contribute most to each component, facilitating a more meaningful understanding of the underlying structure that differentiates LVOT from RVOT. 
@@ -104,6 +121,28 @@ For Task 2, a filtered version of the dataset was created by including only pati
 
 
 = Results and discussion <sec:results_and_discussion>
+
+
+#figure(
+  caption: [Classification Report for LVOT vs. RVOT],
+  placement: top,
+  table(
+    columns: (10em, auto, auto, auto, auto),
+    align: (left, right, right, right, right),
+    inset: (x: 8pt, y: 4pt),
+    stroke: (x, y) => if y <= 1 { (top: 0.5pt) },
+    fill: (x, y) => if y > 0 and calc.rem(y, 2) == 0 { rgb("#efefef") },
+
+    table.header[][Precision][Recall][f1-score][support],
+
+    [LVOT], [0.6568], [0.6976], [0.6766], [1078],
+    [RVOT], [0.9105], [0.8940], [0.9022], [3709],
+    [accuracy], [], [], [0.8498], [4787],
+    [macro average], [0.7836], [0.7958], [0.7894], [4787],
+    [weighted average], [0.8534], [0.8498], [0.8514], [4787],
+  )
+)
+
 
 === Dimensionality reduction
 
