@@ -78,27 +78,57 @@ Further inspection addressed missing values in remaining categorical fields. For
 
 === ECG signal
 
-\Once demographic preprocessing is complete, the ECG signals must be prepared for use as inputs to the machine learning models. The ECG data are stored in a column named Structures within the dataframe as dictionaries, where each entry corresponds to a patient and contains multiple ECG recordings from different anatomical regions and within each anatomical region, different ECG positions are provided. In other words, each patient has several ECGs captured from distinct positions.
+Once demographic preprocessing is complete, the ECG signals must be prepared for use as inputs to the machine learning models. The ECG data is stored in a column named Structures within the dataframe as dictionaries, where each entry corresponds to a patient and contains multiple ECG recordings from different anatomical regions and within each anatomical region, different ECG positions are provided. In other words, each patient has several ECGs captured from distinct positions.
 
 The first step is to restructure this data into a unified dataframe in which each row corresponds to a single ECG, with separate columns for each lead. Each ECG is uniquely identified using the patient ID and the ECG postion. Given that each ECG is 2.5 seconds long and sampled at 1000 Hz, each recording consists of 2500 samples.
 
 Once the ECGs are unified, segmentation, and alignment are performed. Prior to alignment, filtering and segmentation are necessary to ensure clean and interpretable signals. To facilitate segmentation, the ECGs are temporarily downsampled to 250 Hz. This step simplifies the detection of waveforms, but the original 1000 Hz signals are retained for model training to preserve full temporal resolution and signal variability.
 
-Segmentation is performed using  modelos provided by the instructors. These models output binary arrays, where a value of 1 indicates the likely presence of a specific waveform or complex (P-wave, QRS complex, T-wave). To make this information human-readable and practical for further processing, the start and end sample indices of each detected waveform, along with its label, are stored. This data is sufficient to segment the ECGs and prepare them for alignment. For each ECG, a new dataframe is created that contains the intervals corresponding to each identified complex.
+Segmentation is performed using 'modelos' provided by the instructors. These models output binary arrays, where a value of 1 indicates the likely presence of a specific waveform or complex (P-wave, QRS complex, T-wave). To make this information human-readable and practical for further processing, the start and end sample indices of each detected waveform, along with its label, are stored. This data is sufficient to segment the ECGs and prepare them for alignment. For each ECG, a new dataframe is created that contains the intervals corresponding to each identified complex.
 
-Following segmentation, the ECGs are aligned. The alignment criterion is to position the final R-peak (the last QRS complex in the recording) exactly at the 2-second timestep. This step is critical for model A, which performs dimensionality reduction. Aligning the waveforms ensures the model focuses on morphological features rather than temporal variability.
 
-To align the ECGs, the time difference between the detected R-peak and the 2nd second is computed and used to shift the signal accordingly. This process is applied to all ECGs. An outlier analysis is then conducted to identify ECGs that require excessive shifting. Any ECGs deemed outliers are removed from the dataset. Additionally, to ensure all signals have the same length post-alignment, cropping is applied as needed. Originally, each ECG contained 2500 samples, after alignment and cropping, this number is reduced to 2459 samples. Consequently, the aligned R-peak appears at approximately 1.93 seconds instead of exactly 2.0 seconds.
+#figure(
+  block(
+    width: 100%,
+    ```json
+    {
+      "0": {
+        "P": [[723, 851], [1392, 1519]],
+        "QRS": [[892, 1023], [1564, 1676], [1945, 2088]],
+        "T": [[0, 214], [1088, 1295], [1745, 1936], [2105, 2340]]
+      }
+    }
+    ```
+  ),
+  caption: [Example JSON format given to the output from the ECG segmentation model showing the detected P-waves, QRS complexes, and T-waves with their corresponding sample indices.]
+) <fig:ecg-segmentation>
+
+
+
+Following segmentation, the ECGs are aligned. The alignment criterion is to position the final R-peak (the last QRS complex in the recording) exactly at the 2-second timestep. This step is critical for model A, which performs dimensionality reduction. Aligning the waveforms ensures the model focuses on morphological features rather than temporal variability and shifting.
+
+To align the ECGs, the time difference between the detected R-peak and the 2nd second is computed and used to shift the signal accordingly. This process is applied to all ECGs. An outlier analysis is then conducted to identify ECGs that require excessive shifting. Any ECGs deemed outliers are removed from the dataset. Additionally, to ensure all signals have the same length post-alignment, cropping is applied as needed. Originally, each ECG contained 2500 samples, after alignment and cropping, this number is reduced to 2353 samples. Consequently, the aligned R-peak appears at approximately 1.93 seconds instead of exactly 2.0 seconds.
 
 At the end of this process, the ECGs are fully preprocessed and ready to serve as inputs for model A, which performs dimensionality reduction.
 
-=== Dimensionality Reduction (Model A)
 
-To ensure a more reliable and objective analysis, instead of manually selecting the most important features for distinguishing between LVOT and RVOT, we apply dimensionality reduction using Principal Component Analysis (PCA). This allows the algorithm to automatically identify the key features that contribute most to the classification task, instead of using subjective criteria, improving precision. To further improve interpretability, we apply Varimax rotation to the principal components. Varimax is an orthogonal rotation technique that redistributes the variance across components, making the loadings more distinct and sparse. This helps clarify which original features contribute most to each component, facilitating a more meaningful understanding of the underlying structure that differentiates LVOT from RVOT. 
+#figure(
+  image("figures/ecg_segmentation_not_aligned_validation.png", width: 90%),
+  caption: [Validation results of ECG segmentation before alignment, demonstrating the initial segmentation output on the validation dataset.]
+) <fig-segmentation-unaligned>
+
+#figure(
+  image("figures/segmentation_aligned.png", width: 90%),
+  caption: [Aligned ECG segmentation results, showing improved temporal alignment of cardiac cycles.]
+) <fig-segmentation-aligned>
+
+== Dimensionality Reduction (Model A)
+
+To ensure a more reliable and objective analysis, instead of manually selecting the most important features for distinguishing between LVOT and RVOT, we apply dimensionality reduction using Principal Component Analysis (PCA). This allows the algorithm to automatically identify the key features that contribute most to the classification task, instead of using subjective criteria, improving precision. To further improve interpretability, we apply Varimax rotation to the principal components. Varimax is an orthogonal rotation technique that redistributes the variance across components, making the loadings more distinct and sparse. This helps clarify which original features contribute most to each component, facilitating a more meaningful understanding of the underlying structure that differentiates LVOT from RVOT.
 
 Applying dimensionality reduction is important for several reasons. First, it prevents overfitting, since working with too many features can cause the model to fit noise rather than true patterns, reducing generalization to new data. Additionally, handling high-dimensional data is computationally expensive and complex, and the curse of dimensionality makes it difficult for models to learn meaningful relationships when the number of features is very large. Therefore, reducing dimensionality simplifies the problem, improves model performance, and optimizes computation.
 
-== MODEL TRAINING
+== Model training runs
 
 Both demographic and ECG signal data were independently preprocessed and stored in separate dataframes. To enable model training, these dataframes were merged into a single dataset by retaining only patients present in both, identified by a common patient ID. This ensured consistency and prevented data mismatches. 
 
@@ -119,29 +149,22 @@ For Task 2, a filtered version of the dataset was created by including only pati
 = Results and discussion <sec:results_and_discussion>
 
 
-#figure(
-  block(
-    width: 100%,
-    ```json
-    {
-      "0": {
-        "P": [[723, 851], [1392, 1519]],
-        "QRS": [[892, 1023], [1564, 1676], [1945, 2088]],
-        "T": [[0, 214], [1088, 1295], [1745, 1936], [2105, 2340]]
-      }
-    }
-    ```
-  ),
-  caption: [Example JSON output from the ECG segmentation model showing the detected P-waves, QRS complexes, and T-waves with their corresponding sample indices.]
-) <fig:ecg-segmentation>
-
 
 
 === Dimensionality reduction
 
 After performing PCA, the number of features is reduced from 28.236 to 200, while still preserving 95.58% of the total variance in the data. In Figure__ it is displayed a heatmap representing the loadings (the contribution weights) of each ECG lead over time samples for the Varimax PCA performed. Red indicates positive loading, in order words higher contributions, blue negative loadings, and white means close to zero contributions. This figure clearly shows which parts of the ECG signal (across time and across leads) contribute most strongly to this specific component. 
 
-=== Model B
+In examining the principal components derived from the ECG signals, we can approximate the regions of the waveform that contribute most to variability across the dataset. Based on the alignment of the ECG with component 0, it appears that the greatest variability is associated with the QRS complex and extends into the QT interval, suggesting that differences in ventricular depolarization and repolarization dynamics are key sources of variation captured by the PCA.
+
+=== CLassifiaction of LVOT and RVOT
+
+During the training process for Model B, we explored a wide range of hyperparameter configurations for the XGBoost model, including the number of estimators, tree depth, and regularization parameters. As part of this experimentation, we tested a version of the model with a maximum tree depth limited to 1 which means that each decision tree was restricted to a single binary split. Surprisingly, this extremely simple configuration achieved very strong performance. After hyperparameter tuning, the best-performing setup under this constraint used only 17 such trees. While it was not the top-performing model overall, this lite (restricted) version stood out for its simplicity and its ability to generalize well, making accurate predictions using just 17 decision rules.
+In contrast, when training without such constraints the best-performing configuration required 163 trees with a depth of 1. This more complex model yielded slightly better predictive performance but at the cost of increased training time and reduced interpretability. The comparison between these two setups is noteworthy. While the full model delivers optimal results, the lite version achieves competitive performance using a much simpler structure. This demonstrates that the input features, selected by SHAP, carry a strong predictive signal, and that even shallow, low-complexity models can generalize effectively. Moreover, the simplicity of the lite model translates to faster inference and easier interpretation, making it especially valuable in practical, real-world scenarios where model transparency and efficiency are critical.
+The comparison between Model B and its compressed counterpart, Model B-Lite, highlights the trade-offs between model complexity and predictive performance. While Model B-Lite offers a dramatic reduction in model size (from 123.46 KB to 15.17 KB, an 88% reduction) and the number of estimators (from 163 to 17), this comes at a measurable cost in accuracy and overall classification quality. Across all data splits, Model B consistently outperforms Model B-Lite, with a 6.87% drop in accuracy, 9.14% in F1-score, and 4.55% in ROC AUC in the compressed model. Most notably, LVOT 
+classification performance deteriorates more sharply in Model B-Lite, as seen in a lower recall (from 87.60% to 75.30%), which may have downstream clinical relevance. However, despite the performance gap, Model B-Lite still maintains acceptable discrimination (ROC AUC = 0.8795), suggesting it could be a viable option in resource-constrained or real-time deployment settings where model size and inference speed are critical. The slight shift in optimal decision thresholds (0.71 vs. 0.69) is minimal and unlikely to alter decision boundaries substantially.
+
+
 
 #figure(
   caption: [Overall Test Metrics],
@@ -419,16 +442,6 @@ Despite the strong validation metrics, the drop in test performance, particularl
   image("figures/ECG_with_component.png", width: 60%),
   caption: [Electrocardiogram (ECG) signal with highlighted components, showing the key cardiac electrical activity phases and their characteristic waveforms.]
 ) <fig-ecg-components>
-
-#figure(
-  image("figures/ecg_segmentation_not_aligned_validation.png", width: 60%),
-  caption: [Validation results of ECG segmentation before alignment, demonstrating the initial segmentation output on the validation dataset.]
-) <fig-segmentation-unaligned>
-
-#figure(
-  image("figures/segmentation_aligned.png", width: 60%),
-  caption: [Aligned ECG segmentation results, showing improved temporal alignment of cardiac cycles after applying alignment procedures.]
-) <fig-segmentation-aligned>
 
 // Analysis Results
 #figure(
