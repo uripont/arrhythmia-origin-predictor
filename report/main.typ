@@ -7,7 +7,7 @@
   ],
   authors: (
     (
-      name: "Carla Pairés, Oriol Pont, Marc Mallol, Jana Casaú",
+      name: "Jana Casaú, Marc Mallol, Carla Pairés, Oriol Pont",
     ),
   ),
   index-terms: ("Scientific writing", "Typesetting", "Document creation", "Syntax"),
@@ -17,7 +17,11 @@
 
 = Introduction
 
-Ventricular tachycardia (VT) is a potentially life-threatening cardiac arrhythmia that can occur even in structurally normal hearts. In such cases, there is an overtaking of the sino-atrial activation, that is manifested as a premature ventricular contractions (PVC), which disrupts the heart's normal rhythm (PMC9412034). VT is a serious condition that may lead to sudden cardiac death (SCD) if left untreated. Among idiopathic ventricular tachycardias—those that occur in ventricles and are not linked to any detectable structural heart disease—outflow tract ventricular arrhythmias (OTVAs) are the most common subtype.
+Ventricular tachycardia (VT) is a potentially life-threatening cardiac arrhythmia that can occur even in structurally normal hearts. In such cases, there is an overtaking of the sino-atrial activation, that is manifested as a premature ventricular contractions (PVC), which disrupts the heart's normal rhythm @doste2022training
+
+
+
+. VT is a serious condition that may lead to sudden cardiac death (SCD) if left untreated. Among idiopathic ventricular tachycardias—those that occur in ventricles and are not linked to any detectable structural heart disease—outflow tract ventricular arrhythmias (OTVAs) are the most common subtype.
 
 Currently, two main treatments exist for managing OTVAs: antiarrhythmic drugs and radiofrequency ablation (RFA). This study focuses on RFA, a procedure in which targeted energy is used to burn and destroy the myocardial tissue responsible for initiating the arrhythmia. A critical factor for a successful RFA intervention is the accurate localization of the arrhythmia's site of origin (SOO). Identifying whether the SOO is located in the left ventricular outflow tract (LVOT) or the right ventricular outflow tract (RVOT) is essential, as it determines the appropriate vascular access route for the ablation catheter. Early and accurate localization can improve procedural success rates, reduce intervention time, and minimize patient risk.
 
