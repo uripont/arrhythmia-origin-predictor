@@ -12,6 +12,7 @@
       department: ["Computational Models and Data Science for Biomedical Engineering" Course],
       organization: [Universitat Pompeu Fabra (UPF)],
       location: [Barcelona, Spain],
+      email: [https://github.com/uripont/arrhythmia-origin-predictor]
     ),
   ),
   index-terms: (
