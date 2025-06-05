@@ -34,12 +34,12 @@ VT is a serious condition that may lead to Sudden Cardiac Death (SCD) if left un
 
 Currently, two main treatments exist for managing OTVAs: antiarrhythmic drugs and radiofrequency ablation (RFA). This study focuses on RFA, a procedure in which targeted energy is used to burn and destroy the myocardial tissue responsible for initiating the arrhythmia. A critical factor for a successful RFA intervention is the accurate localization of the arrhythmia's Site of Origin (SOO). Identifying whether the SOO is located in the left ventricular outflow tract (LVOT) or the right ventricular outflow tract (RVOT) is essential, as it determines the appropriate vascular access route for the ablation catheter. Early and accurate localization can improve procedural success rates, reduce intervention time, and minimize patient risk.
 
-There are numerous potential SOOs where OTVAs may arise. However, this study focuses specifically on two anatomical locations: the right coronary cusp and commissure. Anatomically, the aortic valve consists of three cusps: the right coronary cusp (RCC), the left coronary cusp (LCC), and the non-coronary cusp (NCC), as illustrated in @fig:aortic-valve. The commissure refers to the junction between two cusps, for example the left-right commissure lies between the LCC and RCC @umn2025cardiacvalvenomenclature.
+There are numerous potential SOOs where OTVAs may arise. However, this study focuses specifically on two anatomical locations: the right coronary cusp and commissure. Anatomically, the aortic valve consists of three cusps: the right coronary cusp (RCC), the left coronary cusp (LCC), and the non-coronary cusp (NCC), as illustrated in @fig-rcc The commissure refers to the junction between two cusps, for example the left-right commissure lies between the LCC and RCC @umn2025cardiacvalvenomenclature.
 
 #figure(
-  image("figures/aortic_valve_cusps.png", width: 70%),
-  caption: [Anatomical representation of the aortic valve showing the right coronary cusp (RCC), left coronary cusp (LCC), and non-coronary cusp (NCC).],
-) <fig:aortic-valve>
+  image("figures/rcc.png", width: 60%),
+  caption: [Detailed view of the right coronary cusp (RCC), highlighting its structural features and anatomical significance in the aortic valve.]
+) <fig-rcc><
 
 The goal of this study is twofold. First, we aim to classify whether the SOO of the arrhythmia is in the LVOT or RVOT using a combination of demographic information and ECG-derived features. Second, the approach is more specific since it is sought to further localize the SOO by distinguishing between two specific anatomical sites: the RCC and the commissure. Both tasks leverage machine learning models trained on clinical and electrophysiological data to enhance pre-procedural planning and support more targeted interventions.
 
@@ -146,6 +146,26 @@ For Task 2, a filtered version of the dataset was created by including only pati
   )
 )
 
+#figure(
+  caption: [Performance Across All Data Splits for LVOT vs. RVOT Classification usin Model_training_B],
+  placement: top,
+  table(
+    columns: (10em, auto, auto, auto, auto),
+    align: (left, right, right, right, right),
+    inset: (x: 8pt, y: 4pt),
+    stroke: (x, y) => if y <= 1 { (top: 0.5pt) },
+    fill: (x, y) => if y > 0 and calc.rem(y, 2) == 0 { rgb("#efefef") },
+
+    table.header[][Accuracy][Precision][Recall][F1-score][ROC AUC][PR AUC],[Threshold],
+
+    [Split], 
+    [Train], [0.8812], [0.8212], [0.9064], [0.8484],[0.9624],[0.9887],[0.71],
+    [Validation], [0.8498], [0.7836], [0.7958], [0.7894],[0.8744],[0.9602],[0.71],
+    [Test], [0.8395], [0.7767], [0.7894], [4787],
+    [All data], [0.8534], [0.8498], [0.8514], [4787],
+  )
+)
+
 
 
 #figure(
@@ -213,6 +233,7 @@ For Task 2, a filtered version of the dataset was created by including only pati
   )
 )
 
+
 === Dimensionality reduction
 
 After performing PCA, the number of features is reduced from 28.236 to 200, while still preserving 95.58% of the total variance in the data. In Figure__ it is displayed a heatmap representing the loadings (the contribution weights) of each ECG lead over time samples for the Varimax PCA performed. Red indicates positive loading, in order words higher contributions, blue negative loadings, and white means close to zero contributions. This figure clearly shows which parts of the ECG signal (across time and across leads) contribute most strongly to this specific component. 
@@ -257,10 +278,7 @@ Despite the strong validation metrics, the drop in test performance, particularl
 
 == FALTA INTERPRETACIO DE LES DE SHAP 
 
-#figure(
-  image("figures/rcc.png", width: 60%),
-  caption: [Detailed view of the right coronary cusp (RCC), highlighting its structural features and anatomical significance in the aortic valve.]
-) <fig-rcc>
+
 
 // ECG Analysis
 #figure(
@@ -292,4 +310,15 @@ Despite the strong validation metrics, the drop in test performance, particularl
 #figure(
   image("figures/shap_values_no_lite.png", width: 60%),
   caption: [Comprehensive SHAP value analysis showing feature contributions in the full model version, providing detailed insights into the model's decision-making process.]
+) <fig-shap-full>
+
+
+#figure(
+  image("figures/system_of_models_part_1.png", width: 60%),
+  caption: [System architecture for Part 1, illustrating the two-stage machine learning approach for predicting the site of origin (SOO) of outflow tract ventricular arrhythmias (OTVAs). The first stage dimensionally reduces ECG features using PCA, while the second stage classifies between LVOT and RVOT origins. The model uses demographic data and ECG features, with SHAP values providing interpretability.]
+) <fig-shap-full>
+
+#figure(
+  image("figures/system_of_models_part_2.png", width: 60%),
+  caption: [System architecture for Part 2, showing the two-stage machine learning approach for further classifying the site of origin (SOO) of outflow tract ventricular arrhythmias (OTVAs) into right coronary cusp (RCC) and commissure. The model builds on the first stage's output, using demographic data and ECG features, with SHAP values enhancing interpretability.]
 ) <fig-shap-full>
