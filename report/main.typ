@@ -1,7 +1,7 @@
 #import "@preview/charged-ieee:0.1.3": ieee
 
 #show: ieee.with(
-  title: [An interpretable prediction system for the Site Of Origin (SOO) of Outflow Tract Ventricular Arrhythmias (OTVAs)],
+  title: [A fast and interpretable prediction system for the Site Of Origin (SOO) of Outflow Tract Ventricular Arrhythmias (OTVAs)],
   abstract: [
     Outflow tract ventricular arrhythmias (OTVAs) require precise localization for effective catheter ablation, yet current methods rely heavily on expert interpretation of 12-lead ECGs. We developed a lightweight, two-stage system of machine learning models that uses basic demographic data and directly extracted ECG features. The goal is to predict, in Part 1, whether an OTVA originates from the left ventricular outflow tract (LVOT) or the right ventricular outflow tract (RVOT), and, in Part 2, to further distinguish between the right coronary cusp (RCC) and the aortomitral commissure sub-regions. Each task employs gradient-boosted trees optimized via stratified cross-validation and leverages SHAP values for transparent, case-level explanations. For Part 1, on a dataset of over 25.000 confirmed OTVA cases, our best-performing model generalized well to unseen data, achieving a total accuracy of 86.70%; while a more lightweight version with only 17 decision trees only lagged 5 to 10% behind in most metrics while being 10 times more lightweight and faster to run. For Part 2, due to a very reduced training set of only 12 patients, the model struggled to generalize.
     By combining high accuracy with fully interpretable outputs, this approach holds promise for guiding preprocedural planning and enhancing clinician confidence in SOO predictions.
@@ -9,6 +9,9 @@
   authors: (
     (
       name: "Jana Casaú, Marc Mallol, Carla Pairés, Oriol Pont",
+      department: ["Computational Models and Data Science for Biomedical Engineering" Course],
+      organization: [Universitat Pompeu Fabra (UPF)],
+      location: [Barcelona, Spain],
     ),
   ),
   index-terms: (
@@ -20,7 +23,7 @@
     "Interpretable machine learning",
   ),
   bibliography: bibliography("refs.bib"),
-  figure-supplement: [Figure],
+  figure-supplement: [Figure], // To automatically add this before the number of each figure when mentioned in the text!
 )
 
 = Introduction
@@ -153,7 +156,7 @@ For Task 2, a filtered version of the dataset was created by including only pati
     inset: (x: 8pt, y: 4pt),
 
     // Thin horizontal line under the header row:
-    stroke: (x, y) => if y == 1 { (top: 0.5pt) },
+    stroke: (x, y) => if y <= 1 { (top: 0.5pt) },
 
     // Light‐gray background on every even data row:
     fill: (x, y) => if y > 1 and calc.rem(y, 2) == 0 { rgb("#f5f5f5") },
@@ -167,6 +170,46 @@ For Task 2, a filtered version of the dataset was created by including only pati
   )
 )
 
+#figure(
+  caption: [Classification Report for LVOT vs. RVOT],
+  placement: top,
+  table(
+    columns: (10em, auto, auto, auto, auto),
+    align: (left, right, right, right, right),
+    inset: (x: 8pt, y: 4pt),
+    stroke: (x, y) => if y <= 1 { (top: 0.5pt) },
+    fill: (x, y) => if y > 0 and calc.rem(y, 2) == 0 { rgb("#efefef") },
+
+    table.header[][Precision][Recall][f1-score][support],
+
+    [LVOT],            [0.6568], [0.6976], [0.6766], [1078],
+    [RVOT],            [0.9105], [0.8940], [0.9022], [3709],
+    [accuracy],        [],       [],       [*0.8498*], [4787],
+    [macro average],   [0.7836], [0.7958], [0.7894], [4787],
+    [weighted average],[0.8534], [0.8498], [0.8514], [4787],
+  )
+)
+
+#figure(
+  caption: [Overall Test Metrics],
+  placement: top,
+  table(
+    columns: (12em, auto),
+    align: (left, right),
+    inset: (x: 8pt, y: 4pt),
+    stroke: (x, y) => if y <= 1 { (top: 0.5pt) },
+    fill: (x, y) => if y > 0 and calc.rem(y, 2) == 0 { rgb("#efefef") },
+
+    table.header[Metric][Value],
+
+    [Macro Accuracy],  [0.8568],
+    [Macro Precision], [0.7954],
+    [Macro Recall],    [0.8436],
+    [Macro F1-Score],  [0.8139],
+    [ROC AUC],         [0.8992],
+    [PR AUC],          [0.9669],
+  )
+)
 
 === Dimensionality reduction
 
@@ -183,13 +226,13 @@ In contrast, when training without such constraints the best-performing configur
 With the initial model train, after hyperparameter optimization, the following most optimal parameters were obtained and used ( posar parameters obtinguts). 
 The following table shows the classification report obtained from this model for the validation set:
 
-POSAR RESULTATS
+== POSAR RESULTATS
 
 For this model, the optimal threshold found was 0.71. The classification results demonstrate strong and balanced model performance in distinguishing between LVOT and RVOT origins. With a macro F1-score of 0.7962 on the test set, the model maintains a high level of generalization while effectively handling class imbalance. Notably, it achieves a recall of 82.4% for LVOT, indicating good sensitivity to the minority class, which is crucial in clinical settings. The overall ROC AUC of 0.89 and PR AUC of 0.96 further confirm the model’s ability to distinguish between classes with high confidence. These results suggest that the chosen threshold of 0.71 yields a well-calibrated classifier that performs reliably across both classes.
 
 Using the “lite” model, with only 17 decisions and 1 for depth, the following results were obtained:
 
-POSAR RESULTATS LITE
+== POSAR RESULTATS LITE
 
 Analyzing our results we can confirm the effectiveness of this simpler XGboost model, maintaining good performance while increasing inference. Although slightly better results are obtained with the previous model, the decrease of number of estimators (163 to 17) clearly justifies the use of this model. At an optimized threshold of 0.75, the model continues to demonstrate robust performance, with a macro F1-score of 0.8139 on the test set, indicating a strong balance between precision and recall across both classes. Notably, LVOT recall improves to 81.9%, enhancing sensitivity to the minority class, which is vital for clinical reliability. Although precision for LVOT is slightly lower at 64.9%, this tradeoff results in a better overall F1-score for the class, suggesting improved detection capability without substantially increasing false positives. Moreover, high ROC AUC (0.8992) and PR AUC (0.9669) confirm excellent separability and reliability, making this threshold a well-calibrated choice that enhances performance on underrepresented cases while maintaining strong accuracy and generalization.
 
@@ -198,59 +241,15 @@ Analyzing our results we can confirm the effectiveness of this simpler XGboost m
 The final trained model for Task 2 was evaluated using macro-F1 score, per-class precision/recall/F1, as well as ROC AUC and PR AUC metrics, using a decision threshold of 0.14, which was the one that maximized the macro-F1
 On the validation set, the model achieved strong performance
 
-RESULTS
+== RESULTS
 
 On the test set, however, model performance dropped noticeably:
 
-POSAR RESULTS
+== POSAR RESULTS
 
 The model maintained high precision for RCC on the test set, indicating that when it predicted RCC, it was correct most of the time. However, recall for RCC was only 0.369, meaning that approximately 63% of actual RCC cases were missed. The ROC AUC obtained (0.2095) for the test set, confirms that the model struggles to differentiate between the two classes, especially RCC. It does slightly better than random guessing. In contrast, commissure classification remained robust across both validation and test sets, with F1 scores above 0.85.
 
 Despite the strong validation metrics, the drop in test performance, particularly for RCC, suggests a generalization gap. This is likely driven by the small number of test patients (n=5) and significant class imbalance. Since only 149 RCC samples were present in the test set, misclassifications in just a few patients could disproportionately impact recall and F1 scores. Additionally, the two sites of origin display really similar ECG behaviour due to how close their location is. 
 
 
-FALTA INTERPRETACIO DE LES DE SHAP 
-
-
-
-
-
-
-#figure(
-  placement: none,
-  circle(radius: 15pt),
-  caption: [A circle representing the Sun.]
-) <fig:sun>
-
-In @fig:sun you can see a common representation of the Sun, which is a star that is located at the center of the solar system.
-
-#figure(
-  caption: [The Planets of the Solar System and Their Average Distance from the Sun],
-  placement: top,
-  table(
-    // Table styling is not mandated by the IEEE. Feel free to adjust these
-    // settings and potentially move them into a set rule.
-    columns: (6em, auto),
-    align: (left, right),
-    inset: (x: 8pt, y: 4pt),
-    stroke: (x, y) => if y <= 1 { (top: 0.5pt) },
-    fill: (x, y) => if y > 0 and calc.rem(y, 2) == 0  { rgb("#efefef") },
-
-    table.header[Planet][Distance (million km)],
-    [Mercury], [57.9],
-    [Venus], [108.2],
-    [Earth], [149.6],
-    [Mars], [227.9],
-    [Jupiter], [778.6],
-    [Saturn], [1,433.5],
-    [Uranus], [2,872.5],
-    [Neptune], [4,495.1],
-  )
-)
-
-In you see the planets of the solar system and their average distance from the Sun.
-
-
-#lorem(10)
-
-Les referencies es posen soles!!! (mireu a files el file refs.bib. Quan poses una arroba i el nom d'una referencia, es menciona sol. I al final del full es posen tots @netwok2020 i hi ha autocompletado i tot!
+== FALTA INTERPRETACIO DE LES DE SHAP 
