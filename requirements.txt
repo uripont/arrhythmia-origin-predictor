@@ -18,7 +18,7 @@ joblib>=1.0.0
 ############################################
 # Deep learning
 ############################################
-torch==2.7.0          # keep pinned to CUDA/toolchain you tested
+torch==2.4.1
 timm>=0.5.4
 
 ############################################
@@ -39,3 +39,5 @@ sak @ git+https://github.com/guillermo-jimenez/sak.git
 ############################################
 ipykernel>=6.0.0
 openpyxl>=3.0.0
+memory-profiler>=0.61.0
+psutil>=5.9.0

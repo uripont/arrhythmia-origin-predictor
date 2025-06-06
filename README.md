@@ -23,3 +23,21 @@ The goal of this project is to develop a system of models for each task that can
 ## About the process
 
 The project is designed to be **easily reproducible**, with all the code and data organized in a clear and structured manner. This is why the whole end-to-end pipeline is contained in a single Jupyter Notebook ([project_arrhythmias.ipynb](project_arrhythmias.ipynb)), which includes all the steps from data preprocessing to model evaluation. This notebook explains our approach in detail, and can be executed to reproduce the results on any machine.
+
+Moreover, the results of the projects are summarized in a [report](./report/report.pdf), which provides an overview of the methods used, the results obtained, and the main conclusions drawn from the analysis in 8 pages.
+
+## Requirements
+
+- Python 3.8 or higher
+- Jupyter Notebook
+- Required Python packages listed in `requirements.txt`
+
+It's recommended to create a virtual environment and install the required packages using:
+
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+pip install -r requirements.txt
+```
+
+Then the kernel should be detected automatically by Jupyter Notebook.
